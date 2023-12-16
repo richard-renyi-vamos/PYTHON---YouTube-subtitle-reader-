@@ -1,0 +1,35 @@
+from googleapiclient.discovery import build
+import os
+
+# YouTube Data API Key
+api_key = 'YOUR_API_KEY'
+
+# YouTube video ID
+video_id = 'YOUR_VIDEO_ID'
+
+# Build the YouTube API service
+youtube = build('youtube', 'v3', developerKey=api_key)
+
+# Request the captions (subtitles) for the video
+captions = youtube.captions().list(
+    part='snippet',
+    videoId=video_id
+).execute()
+
+# Get the first available caption track (assuming it exists)
+if captions['items']:
+    caption_id = captions['items'][0]['id']
+
+    # Download the caption track
+    caption_info = youtube.captions().download(
+        id=caption_id,
+        tfmt='srt'  # SubRip (srt) format
+    ).execute()
+
+    # Save captions to a text file
+    with open('captions.txt', 'w', encoding='utf-8') as file:
+        file.write(caption_info.decode('utf-8'))
+
+    print('Captions saved to captions.txt')
+else:
+    print('No captions found for this video.')
